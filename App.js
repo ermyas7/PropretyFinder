@@ -10,13 +10,16 @@
 import React from 'react';
 import {createStackNavigator, createAppContainer,} from 'react-navigation';
 import SearchPage from './SearchPage';
-
+import SearchResults from './SearchResults';
 
 
 
 const App = createStackNavigator({
  HOME: {
    screen: SearchPage
+ },
+ Results: {
+   screen: SearchResults
  } 
 });
 

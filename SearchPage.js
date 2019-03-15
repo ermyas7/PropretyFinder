@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 
 
-
 type Props = {};
 
 class SearchPage extends Component<Props> {
@@ -45,7 +44,9 @@ class SearchPage extends Component<Props> {
       message: '',
     });
     if(response.application_response_code.substring(0,1) === '1'){
-      console.log(`Properties found: ${response.listings.length}`);
+      this.props.navigation.navigate(
+        'Results', {listings: response.listings}
+      );
     }else{
       this.setState({message: 'Location not recognized Please try again!'});
     }
