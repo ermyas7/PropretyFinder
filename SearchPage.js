@@ -9,13 +9,36 @@ import {
     StyleSheet,
 } from 'react-native';
 
+
 type Props = {};
 
 class SearchPage extends Component<Props> {
+  constructor(props){
+    super(props);
+    this.state = {
+      searchString: 'london',
+      isLoading: false 
+    };
+  }
+
+  _onSearchTextChanged = (event) => {
+    this.setState({searchString : event.nativeEvent.text});
+  }
+
+  _excuteQuery = (query) => {
+    console.log(query);
+    this.setState({isLoading: true});
+  }
+
+  _onSearchPressed = () => {
+    const query = urlForQueryAndPage('place-name', this.state.searchString, 1);
+    this._excuteQuery(query);
+  }
   static navigationOptions =  {
     title: 'Property Finder',
   }
   render() {
+    const spinner = this.state.isLoading? <ActivityIndicator size='large'/> : null;
     return (
       <View style={styles.container}>
           <Text style={styles.description}>
@@ -29,11 +52,14 @@ class SearchPage extends Component<Props> {
             <TextInput 
             underlineColorAndroid={'transparent'}
             style={styles.searchInput}
-            placeholder='Search vis place name or post code'/>
-            <Button title='Go' onPress={() => {}} color='#48BBEC'/>
+            placeholder='Search via name or post code'
+            value={this.state.searchString}
+            onChange={this._onSearchTextChanged}/>
+            <Button title='Go' onPress={this._onSearchPressed} color='#48BBEC'/>
         </View>
 
         <Image source={require('./Resources/house.png')} style={styles.image}/>
+        {spinner}
       </View>
     )
   }
@@ -72,5 +98,24 @@ const styles = StyleSheet.create({
       height: 138,
     },
   });
+
+  //utility function
+  function urlForQueryAndPage(key, value, pageNumber) {
+    const data = {
+        country: 'uk',
+        pretty: '1',
+        encoding: 'json',
+        listing_type: 'buy',
+        action: 'search_listings',
+        page: pageNumber,
+    };
+    data[key] = value;
+  
+    const querystring = Object.keys(data)
+      .map(key => key + '=' + encodeURIComponent(data[key]))
+      .join('&');
+  
+    return 'https://api.nestoria.co.uk/api?' + querystring;
+  }
 
 export default SearchPage
