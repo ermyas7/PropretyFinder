@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 
+
 type Props = {};
 
 class SearchPage extends Component<Props> {
@@ -17,7 +18,8 @@ class SearchPage extends Component<Props> {
     super(props);
     this.state = {
       searchString: 'london',
-      isLoading: false 
+      isLoading: false,
+      message: '', 
     };
   }
 
@@ -26,12 +28,31 @@ class SearchPage extends Component<Props> {
   }
 
   _excuteQuery = (query) => {
-    console.log(query);
     this.setState({isLoading: true});
+    fetch(query)
+    .then((response) => response.json())
+    .then((json) => this._handleResponse(json.response))
+    .catch((err) => {
+      this.setState({
+        isLoading:false,
+        message: `Something bad hapened ${err}`});
+    });
+  }
+
+  _handleResponse = (response) => {
+    this.setState({
+      isLoading: false,
+      message: '',
+    });
+    if(response.application_response_code.substring(0,1) === '1'){
+      console.log(`Properties found: ${response.listings.length}`);
+    }else{
+      this.setState({message: 'Location not recognized Please try again!'});
+    }
   }
 
   _onSearchPressed = () => {
-    const query = urlForQueryAndPage('place-name', this.state.searchString, 1);
+    const query = urlForQueryAndPage('place_name', this.state.searchString, 1);
     this._excuteQuery(query);
   }
   static navigationOptions =  {
@@ -60,6 +81,7 @@ class SearchPage extends Component<Props> {
 
         <Image source={require('./Resources/house.png')} style={styles.image}/>
         {spinner}
+        <Text style={styles.description}>{this.state.message}</Text>
       </View>
     )
   }
@@ -102,12 +124,13 @@ const styles = StyleSheet.create({
   //utility function
   function urlForQueryAndPage(key, value, pageNumber) {
     const data = {
-        country: 'uk',
-        pretty: '1',
         encoding: 'json',
-        listing_type: 'buy',
+        pretty: '1',
         action: 'search_listings',
+        country: 'uk',
+        listing_type: 'buy',
         page: pageNumber,
+
     };
     data[key] = value;
   
