@@ -4,29 +4,65 @@ import {
     StyleSheet,
     Image,
     View,
-    TouchableHighLight,
+    TouchableHighlight,
     FlatList,
     Text,
 } from 'react-native';
-import { TouchableHighlight } from 'react-native-gesture-handler';
 
-export class SearchResults extends Component {
+
+class ListItem extends React.PureComponent{
+    _onPress = () => {
+        this.props.onPressItem(this.props.index)
+    }
+
+    render(){
+        const item = this.props.item;
+        var price = item.price_formatted;
+        if (typeof price != 'undefined') {
+        price = item.price_formatted.split(' ')[0];
+        } else {
+        price = 'error'
+        }
+        return(
+            <TouchableHighlight
+            onPress={this._onPress}
+            underlayColor='#dddddd'>
+                <View>
+                    <View style={styles.rowContainer}>
+                        <Image style={styles.thumb}
+                        source={{uri: item.img_url}}/>
+                        <View stlye={styles.textContainer}>
+                            <Text style={styles.price}>
+                                {price}
+                            </Text>
+                            <Text stlye={styles.title}
+                             numberOfLines={1}>{item.title}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.separator}/>
+                </View>
+            </TouchableHighlight>    
+        );
+    }
+}
+
+type Props = {};
+export default class SearchResults extends Component<Props>{
   static navigationOptions = {
-      title: 'Results'
-  };
-  
-  _keyExtractor = (item, index) => {
-      return index.toString();
+      title: 'Results',
   }
+  
+  _keyExtractor = (item, index) =>  index.toString();
 
-  _renderItem = ({item})=>{
-      return(
-          <TouchableHighlight underlayColor='#dddddd'>
-            <View>
-                <Text>{item.title}</Text>
-            </View>
-          </TouchableHighlight>
-      )
+  _renderItem = ({item, index}) => (
+          <ListItem
+          item={item}
+          index={index}
+          onPressItem={this._onPressItem}/>
+  );
+
+  _onPressItem = (index) => {
+    console.log("Pressed row: " + index)
   }
   render() {
     const {params} = this.props.navigation.state;
@@ -39,4 +75,31 @@ export class SearchResults extends Component {
   }
 }
 
-export default SearchResults
+
+const styles = StyleSheet.create({
+    thumb: {
+        width: 80,
+        height: 80,
+        marginBottom: 10,
+    },
+    textContainer:{
+        flex: 1,
+    },
+    separator: {
+        height: 1,
+        backgroundColor: '#dddddd',
+    },
+    price: {
+        fontSize: 25,
+        fontWeight: 'bold',
+    },
+    title: {
+        fontSize: 20,
+        color: '#656565'
+    },
+    rowContainer:{
+        flexDirection: 'row',
+        padding: 10,
+    },
+})
+
